@@ -1,0 +1,1052 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>TextBack — Not everyone replies right away.</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+
+<style>
+  :root {
+    --bg: #0C0B09;
+    --bg-2: #141310;
+    --bg-3: #1C1A16;
+    --amber: #D4A853;
+    --amber-dim: #8A6B2E;
+    --cream: #F0EBE1;
+    --cream-dim: #9E978A;
+    --cream-dimmer: #4A4540;
+    --bubble-out: #1F1D18;
+    --bubble-in: #252117;
+    --border: rgba(212, 168, 83, 0.12);
+    --border-dim: rgba(240, 235, 225, 0.06);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--cream);
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 300;
+    line-height: 1.6;
+    overflow-x: hidden;
+  }
+
+  /* ── NOISE OVERLAY ── */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.5;
+  }
+
+  /* ── NAV ── */
+  nav {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 100;
+    padding: 22px 40px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: linear-gradient(to bottom, var(--bg) 60%, transparent);
+  }
+
+  .logo {
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+    font-weight: 400;
+    letter-spacing: 0.15em;
+    color: var(--amber);
+    text-transform: uppercase;
+    text-decoration: none;
+  }
+
+  .nav-cta {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--cream-dim);
+    border: 1px solid var(--border);
+    padding: 8px 18px;
+    text-decoration: none;
+    transition: all 0.2s;
+  }
+
+  .nav-cta:hover {
+    border-color: var(--amber);
+    color: var(--amber);
+  }
+
+  /* ── HERO ── */
+  .hero {
+    position: relative;
+    z-index: 1;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 120px 40px 80px;
+    max-width: 900px;
+    margin: 0 auto;
+  }
+
+  .hero-eyebrow {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--amber);
+    margin-bottom: 32px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .hero-eyebrow::before {
+    content: '';
+    display: block;
+    width: 32px;
+    height: 1px;
+    background: var(--amber);
+    flex-shrink: 0;
+  }
+
+  h1 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(48px, 8vw, 88px);
+    font-weight: 300;
+    line-height: 1.05;
+    letter-spacing: -0.01em;
+    color: var(--cream);
+    margin-bottom: 28px;
+  }
+
+  h1 em {
+    font-style: italic;
+    color: var(--amber);
+  }
+
+  .hero-sub {
+    font-size: 17px;
+    font-weight: 300;
+    color: var(--cream-dim);
+    max-width: 520px;
+    line-height: 1.65;
+    margin-bottom: 52px;
+  }
+
+  .hero-actions {
+    display: flex;
+    align-items: center;
+    gap: 28px;
+    flex-wrap: wrap;
+  }
+
+  .btn-primary {
+    background: var(--amber);
+    color: var(--bg);
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    font-weight: 500;
+    padding: 14px 28px;
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: inline-block;
+  }
+
+  .btn-primary:hover { background: var(--cream); }
+
+  .hero-note {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--cream-dimmer);
+    letter-spacing: 0.06em;
+  }
+
+  /* ── THREAD PREVIEW ── */
+  .thread-preview {
+    position: relative;
+    z-index: 1;
+    background: var(--bg-2);
+    border-top: 1px solid var(--border-dim);
+    border-bottom: 1px solid var(--border-dim);
+    padding: 80px 40px;
+    overflow: hidden;
+  }
+
+  .thread-preview::before {
+    content: '';
+    position: absolute;
+    top: -80px;
+    right: -80px;
+    width: 360px;
+    height: 360px;
+    background: radial-gradient(circle, rgba(212,168,83,0.04) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .thread-inner {
+    max-width: 700px;
+    margin: 0 auto;
+  }
+
+  .thread-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--amber-dim);
+    margin-bottom: 40px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .thread-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border-dim);
+  }
+
+  .thread-contact {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 28px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--border-dim);
+  }
+
+  .contact-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--bg-3);
+    border: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--amber);
+  }
+
+  .contact-name {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--cream);
+  }
+
+  .contact-role {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--cream-dimmer);
+  }
+
+  .messages {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .msg {
+    display: flex;
+    flex-direction: column;
+    opacity: 0;
+    animation: msgIn 0.4s ease forwards;
+  }
+
+  .msg.sent { align-items: flex-end; }
+  .msg.received { align-items: flex-start; }
+
+  .msg-bubble {
+    padding: 11px 16px;
+    max-width: 72%;
+    font-size: 14px;
+    line-height: 1.5;
+    border-radius: 2px;
+  }
+
+  .sent .msg-bubble {
+    background: var(--bubble-out);
+    color: var(--cream);
+    border: 1px solid var(--border-dim);
+  }
+
+  .received .msg-bubble {
+    background: var(--amber);
+    color: var(--bg);
+  }
+
+  .msg-time {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.08em;
+    color: var(--cream-dimmer);
+    margin-top: 5px;
+  }
+
+  .typing-indicator {
+    display: flex;
+    gap: 4px;
+    align-items: center;
+    padding: 14px 18px;
+    background: var(--bg-3);
+    border: 1px solid var(--border-dim);
+    width: fit-content;
+    border-radius: 2px;
+    opacity: 0;
+    animation: msgIn 0.4s ease 2.8s forwards;
+  }
+
+  .typing-dot {
+    width: 5px;
+    height: 5px;
+    background: var(--amber-dim);
+    border-radius: 50%;
+    animation: typingPulse 1.4s ease-in-out infinite;
+  }
+
+  .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+  .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+
+  .delay-note {
+    margin-top: 24px;
+    padding: 14px 18px;
+    background: rgba(212,168,83,0.05);
+    border: 1px solid var(--border);
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--amber-dim);
+    letter-spacing: 0.06em;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .delay-note-icon {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--amber);
+    animation: breathe 3s ease-in-out infinite;
+    flex-shrink: 0;
+  }
+
+  /* ── PHILOSOPHY ── */
+  .philosophy {
+    position: relative;
+    z-index: 1;
+    padding: 100px 40px;
+    max-width: 900px;
+    margin: 0 auto;
+  }
+
+  .philosophy-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 64px;
+    align-items: start;
+  }
+
+  .philosophy-left h2 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(32px, 4vw, 48px);
+    font-weight: 300;
+    line-height: 1.2;
+    color: var(--cream);
+    margin-bottom: 24px;
+  }
+
+  .philosophy-left h2 em {
+    font-style: italic;
+    color: var(--amber);
+  }
+
+  .philosophy-right {
+    padding-top: 8px;
+  }
+
+  .philosophy-right p {
+    font-size: 15px;
+    color: var(--cream-dim);
+    line-height: 1.75;
+    margin-bottom: 20px;
+  }
+
+  .philosophy-right p:last-child { margin-bottom: 0; }
+
+  /* ── PERSONAS ── */
+  .personas {
+    position: relative;
+    z-index: 1;
+    background: var(--bg-2);
+    border-top: 1px solid var(--border-dim);
+    padding: 100px 40px;
+  }
+
+  .personas-inner {
+    max-width: 900px;
+    margin: 0 auto;
+  }
+
+  .section-header {
+    margin-bottom: 60px;
+  }
+
+  .section-eyebrow {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--amber-dim);
+    margin-bottom: 16px;
+  }
+
+  .section-header h2 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(28px, 4vw, 42px);
+    font-weight: 300;
+    color: var(--cream);
+  }
+
+  .persona-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 2px;
+  }
+
+  .persona-card {
+    background: var(--bg-3);
+    padding: 32px 28px;
+    border: 1px solid var(--border-dim);
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .persona-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: var(--amber);
+    transform: scaleX(0);
+    transition: transform 0.3s ease;
+    transform-origin: left;
+  }
+
+  .persona-card:hover::before { transform: scaleX(1); }
+  .persona-card:hover { background: #1A1815; }
+
+  .persona-tag {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--amber);
+    margin-bottom: 14px;
+  }
+
+  .persona-name {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 22px;
+    font-weight: 400;
+    color: var(--cream);
+    margin-bottom: 10px;
+  }
+
+  .persona-desc {
+    font-size: 13px;
+    font-weight: 300;
+    color: var(--cream-dim);
+    line-height: 1.6;
+    margin-bottom: 20px;
+  }
+
+  .persona-example {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--cream-dimmer);
+    line-height: 1.6;
+    padding: 12px 14px;
+    background: rgba(0,0,0,0.3);
+    border-left: 2px solid var(--amber-dim);
+    font-style: italic;
+  }
+
+  .persona-timing {
+    margin-top: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    color: var(--cream-dimmer);
+    letter-spacing: 0.08em;
+  }
+
+  .timing-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--amber-dim);
+    animation: breathe 3s ease-in-out infinite;
+  }
+
+  /* ── HOW IT WORKS ── */
+  .how {
+    position: relative;
+    z-index: 1;
+    padding: 100px 40px;
+    max-width: 900px;
+    margin: 0 auto;
+  }
+
+  .steps {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 2px;
+    margin-top: 60px;
+  }
+
+  .step {
+    padding: 0;
+    position: relative;
+  }
+
+  .step-num {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    color: var(--amber);
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .step-num::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border-dim);
+  }
+
+  .step-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 20px;
+    font-weight: 400;
+    color: var(--cream);
+    margin-bottom: 12px;
+  }
+
+  .step-body {
+    font-size: 13px;
+    font-weight: 300;
+    color: var(--cream-dim);
+    line-height: 1.65;
+  }
+
+  /* ── PRICING ── */
+  .pricing {
+    position: relative;
+    z-index: 1;
+    background: var(--bg-2);
+    border-top: 1px solid var(--border-dim);
+    padding: 100px 40px;
+  }
+
+  .pricing-inner {
+    max-width: 900px;
+    margin: 0 auto;
+  }
+
+  .pricing-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2px;
+    margin-top: 60px;
+  }
+
+  .pricing-card {
+    background: var(--bg-3);
+    border: 1px solid var(--border-dim);
+    padding: 44px 36px;
+    position: relative;
+  }
+
+  .pricing-card.featured {
+    border-color: var(--amber);
+    background: #181510;
+  }
+
+  .pricing-badge {
+    position: absolute;
+    top: -1px;
+    right: 28px;
+    background: var(--amber);
+    color: var(--bg);
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    font-weight: 500;
+    padding: 5px 10px;
+  }
+
+  .price-tier {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--amber-dim);
+    margin-bottom: 16px;
+  }
+
+  .price-amount {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 52px;
+    font-weight: 300;
+    color: var(--cream);
+    line-height: 1;
+    margin-bottom: 6px;
+  }
+
+  .price-amount sup {
+    font-size: 22px;
+    vertical-align: super;
+  }
+
+  .price-cadence {
+    font-size: 13px;
+    color: var(--cream-dimmer);
+    margin-bottom: 32px;
+  }
+
+  .price-features {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 36px;
+  }
+
+  .price-features li {
+    font-size: 14px;
+    font-weight: 300;
+    color: var(--cream-dim);
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border-dim);
+  }
+
+  .price-features li:last-child { border-bottom: none; }
+
+  .price-features li::before {
+    content: '—';
+    color: var(--amber-dim);
+    flex-shrink: 0;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    margin-top: 2px;
+  }
+
+  .btn-outline {
+    display: block;
+    text-align: center;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--cream-dim);
+    border: 1px solid var(--border);
+    padding: 14px 28px;
+    text-decoration: none;
+    transition: all 0.2s;
+  }
+
+  .btn-outline:hover { border-color: var(--amber); color: var(--amber); }
+
+  .pricing-card.featured .btn-outline {
+    background: var(--amber);
+    color: var(--bg);
+    border-color: var(--amber);
+  }
+
+  .pricing-card.featured .btn-outline:hover { background: var(--cream); border-color: var(--cream); }
+
+  /* ── FOOTER CALLOUT ── */
+  .footer-callout {
+    position: relative;
+    z-index: 1;
+    padding: 120px 40px;
+    max-width: 900px;
+    margin: 0 auto;
+    text-align: center;
+  }
+
+  .footer-callout h2 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(36px, 5vw, 60px);
+    font-weight: 300;
+    color: var(--cream);
+    margin-bottom: 24px;
+    line-height: 1.15;
+  }
+
+  .footer-callout h2 em { font-style: italic; color: var(--amber); }
+
+  .footer-callout p {
+    font-size: 15px;
+    color: var(--cream-dim);
+    margin-bottom: 44px;
+    max-width: 480px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  footer {
+    border-top: 1px solid var(--border-dim);
+    padding: 28px 40px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .footer-logo {
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    color: var(--cream-dimmer);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  .footer-links {
+    display: flex;
+    gap: 28px;
+  }
+
+  .footer-links a {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--cream-dimmer);
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+
+  .footer-links a:hover { color: var(--amber); }
+
+  /* ── ANIMATIONS ── */
+  @keyframes msgIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes typingPulse {
+    0%, 80%, 100% { opacity: 0.3; transform: translateY(0); }
+    40% { opacity: 1; transform: translateY(-3px); }
+  }
+
+  @keyframes breathe {
+    0%, 100% { opacity: 0.4; }
+    50% { opacity: 1; }
+  }
+
+  .msg:nth-child(1) { animation-delay: 0.2s; }
+  .msg:nth-child(2) { animation-delay: 0.9s; }
+  .msg:nth-child(3) { animation-delay: 1.8s; }
+  .msg:nth-child(4) { animation-delay: 2.5s; }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 700px) {
+    nav { padding: 18px 20px; }
+    .hero { padding: 100px 20px 60px; }
+    .thread-preview, .personas, .how, .pricing, .philosophy { padding: 60px 20px; }
+    .philosophy-grid { grid-template-columns: 1fr; gap: 36px; }
+    .steps { grid-template-columns: 1fr 1fr; gap: 28px; }
+    .pricing-grid { grid-template-columns: 1fr; }
+    footer { flex-direction: column; gap: 16px; text-align: center; }
+    .footer-callout { padding: 80px 20px; }
+  }
+</style>
+</head>
+
+<body>
+
+<!-- NAV -->
+<nav>
+  <a class="logo" href="#">TextBack</a>
+  <a class="nav-cta" href="#personas">Pick your persona →</a>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-eyebrow">Human-paced AI texting</div>
+  <h1>Not everyone<br />texts back <em>right away.</em><br />That's the point.</h1>
+  <p class="hero-sub">
+    Pick who you need to talk to. A coach. A friend. Someone to practice on.
+    They'll respond the way a human would — in hours, not milliseconds.
+  </p>
+  <div class="hero-actions">
+    <a class="btn-primary" href="#personas">Choose your person</a>
+    <span class="hero-note">No app. Just text. $15/month.</span>
+  </div>
+</section>
+
+<!-- THREAD PREVIEW -->
+<section class="thread-preview">
+  <div class="thread-inner">
+    <div class="thread-label">Example thread — The Coach</div>
+
+    <div class="thread-contact">
+      <div class="contact-avatar">JK</div>
+      <div>
+        <div class="contact-name">Jordan</div>
+        <div class="contact-role">Your Coach · Responds in 4–14 hrs</div>
+      </div>
+    </div>
+
+    <div class="messages">
+      <div class="msg sent">
+        <div class="msg-bubble">I keep pushing the pitch to next week. I know I'm making excuses.</div>
+        <div class="msg-time">Yesterday 11:14 PM</div>
+      </div>
+      <div class="msg received">
+        <div class="msg-bubble">Name one thing that actually happens if you pitch and it doesn't go well.</div>
+        <div class="msg-time">Today 9:03 AM · 10 hours later</div>
+      </div>
+      <div class="msg sent">
+        <div class="msg-bubble">I mean... nothing catastrophic. I learn, I adjust.</div>
+        <div class="msg-time">Today 9:11 AM</div>
+      </div>
+      <div class="msg received">
+        <div class="msg-bubble">Right. So the only scenario where something bad happens is if you never pitch. Schedule it for Thursday. Text me when it's done.</div>
+        <div class="msg-time">Today 7:44 PM · 10 hours later</div>
+      </div>
+    </div>
+
+    <div style="margin-top: 16px;">
+      <div class="typing-indicator">
+        <div class="typing-dot"></div>
+        <div class="typing-dot"></div>
+        <div class="typing-dot"></div>
+      </div>
+    </div>
+
+    <div class="delay-note">
+      <div class="delay-note-icon"></div>
+      Responses are randomized. Never a fixed schedule. It feels like a person because the timing is a person's.
+    </div>
+  </div>
+</section>
+
+<!-- PHILOSOPHY -->
+<section class="philosophy">
+  <div class="philosophy-grid">
+    <div class="philosophy-left">
+      <h2>Instant replies<br /><em>kill the thought.</em></h2>
+    </div>
+    <div class="philosophy-right">
+      <p>
+        When a response arrives in two seconds, it disappears in three. You scroll past it.
+        You fire something back without sitting with what was just said to you.
+      </p>
+      <p>
+        A message that arrives eight hours later is different. You read it in the morning, before your first meeting.
+        Or at 11pm when the day is quiet. It lands in a different context than the one you were in when you sent it.
+        It has weight.
+      </p>
+      <p>
+        We built intentional delay into the core of how TextBack works — not as a limitation, 
+        but because the timing is part of what makes a conversation real.
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- PERSONAS -->
+<section class="personas" id="personas">
+  <div class="personas-inner">
+    <div class="section-header">
+      <div class="section-eyebrow">Your roster</div>
+      <h2>Who do you need<br />to hear from?</h2>
+    </div>
+
+    <div class="persona-grid">
+
+      <div class="persona-card">
+        <div class="persona-tag">01 — The Coach</div>
+        <div class="persona-name">Push back.</div>
+        <div class="persona-desc">Holds you accountable. Doesn't let you off the hook. Won't validate the excuse you're trying to sell.</div>
+        <div class="persona-example">"Name one concrete thing that actually happens if this goes badly."</div>
+        <div class="persona-timing">
+          <div class="timing-dot"></div>
+          Responds in 4–12 hrs
+        </div>
+      </div>
+
+      <div class="persona-card">
+        <div class="persona-tag">02 — The Friend</div>
+        <div class="persona-name">Just listen.</div>
+        <div class="persona-desc">Doesn't fix, doesn't advise. Sits with what you said, asks one good question, makes you feel heard.</div>
+        <div class="persona-example">"That sounds exhausting. When did it start feeling that way?"</div>
+        <div class="persona-timing">
+          <div class="timing-dot"></div>
+          Responds in 6–14 hrs
+        </div>
+      </div>
+
+      <div class="persona-card">
+        <div class="persona-tag">03 — The Practice Run</div>
+        <div class="persona-name">Text the risk.</div>
+        <div class="persona-desc">Say the thing you want to say — to your actual crush, your boss, your estranged parent — before you say it to them. See how it reads.</div>
+        <div class="persona-example">"I've been thinking about what you said. I don't think I handled that well."</div>
+        <div class="persona-timing">
+          <div class="timing-dot"></div>
+          Responds in 3–10 hrs
+        </div>
+      </div>
+
+      <div class="persona-card">
+        <div class="persona-tag">04 — The Adversary</div>
+        <div class="persona-name">Think like them.</div>
+        <div class="persona-desc">Simulates how your competitor, skeptic, or toughest critic would respond to your pitch, your plan, your argument. Stress test before it counts.</div>
+        <div class="persona-example">"This is interesting, but why wouldn't someone just use [existing solution]?"</div>
+        <div class="persona-timing">
+          <div class="timing-dot"></div>
+          Responds in 5–16 hrs
+        </div>
+      </div>
+
+      <div class="persona-card">
+        <div class="persona-tag">05 — The Steady</div>
+        <div class="persona-name">Process out loud.</div>
+        <div class="persona-desc">Not therapy. Not advice. A calm, consistent voice that helps you think through what's heavy — with no agenda and no clock running.</div>
+        <div class="persona-example">"You've mentioned this a few times. What do you think is underneath it?"</div>
+        <div class="persona-timing">
+          <div class="timing-dot"></div>
+          Responds in 8–20 hrs
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="how">
+  <div class="section-header">
+    <div class="section-eyebrow">Setup</div>
+    <h2>No app. Four steps.</h2>
+  </div>
+
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">01</div>
+      <div class="step-title">Pick your persona</div>
+      <div class="step-body">Choose who you need. Coach, Friend, Practice Run, Adversary, Steady. You'll start with one and can add more.</div>
+    </div>
+    <div class="step">
+      <div class="step-num">02</div>
+      <div class="step-title">Get a contact</div>
+      <div class="step-body">You'll get a phone number to save in your contacts. Name it whatever you want. Jordan. Sam. Coach.</div>
+    </div>
+    <div class="step">
+      <div class="step-num">03</div>
+      <div class="step-title">Text normally</div>
+      <div class="step-body">Open your messages and text the number like you'd text anyone. Forget it's AI. That's the point.</div>
+    </div>
+    <div class="step">
+      <div class="step-num">04</div>
+      <div class="step-title">Wait for it</div>
+      <div class="step-body">You'll get a reply within hours — not seconds. The randomized window is different every time. You'll stop expecting it and start being surprised by it.</div>
+    </div>
+  </div>
+</section>
+
+<!-- PRICING -->
+<section class="pricing">
+  <div class="pricing-inner">
+    <div class="section-header">
+      <div class="section-eyebrow">Pricing</div>
+      <h2>Simple.</h2>
+    </div>
+
+    <div class="pricing-grid">
+      <div class="pricing-card">
+        <div class="price-tier">One Person</div>
+        <div class="price-amount"><sup>$</sup>15</div>
+        <div class="price-cadence">per month</div>
+        <ul class="price-features">
+          <li>One active persona of your choice</li>
+          <li>Unlimited texts per month</li>
+          <li>Full conversation memory — your context carries forward every thread</li>
+          <li>Randomized reply windows tuned to your persona</li>
+        </ul>
+        <a class="btn-outline" href="#">Get started</a>
+      </div>
+
+      <div class="pricing-card featured">
+        <div class="pricing-badge">Most popular</div>
+        <div class="price-tier">The Full Roster</div>
+        <div class="price-amount"><sup>$</sup>25</div>
+        <div class="price-cadence">per month</div>
+        <ul class="price-features">
+          <li>All five personas, active simultaneously</li>
+          <li>Unlimited texts per month</li>
+          <li>Shared context across personas — they know your history</li>
+          <li>Context export — your full thread history, anytime</li>
+          <li>Persona tuning — adjust tone and response window</li>
+        </ul>
+        <a class="btn-outline" href="#">Get started</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER CALLOUT -->
+<section class="footer-callout">
+  <h2>The conversations you<br />keep putting off<br /><em>can start tonight.</em></h2>
+  <p>Text something you wouldn't say out loud. See how it feels to send it. Hear something back that changes how you think about it.</p>
+  <a class="btn-primary" href="#personas">Pick who you need</a>
+</section>
+
+<footer>
+  <div class="footer-logo">TextBack</div>
+  <div class="footer-links">
+    <a href="#">Privacy</a>
+    <a href="#">Terms</a>
+    <a href="#">How it works</a>
+  </div>
+</footer>
+
+</body>
+</html>
